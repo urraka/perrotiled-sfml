@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{0CD7E321-2753-11E2-A68E-E0CB4E90556E}") = "perrotiled2", "perrotiled2.vcxproj", "{0CD71FD2-2753-11E2-A993-E0CB4E90556E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0CD71FD2-2753-11E2-A993-E0CB4E90556E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0CD71FD2-2753-11E2-A993-E0CB4E90556E}.Debug|Win32.Build.0 = Debug|Win32
+		{0CD71FD2-2753-11E2-A993-E0CB4E90556E}.Release|Win32.ActiveCfg = Release|Win32
+		{0CD71FD2-2753-11E2-A993-E0CB4E90556E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,8 @@
+[Tt]humbs.db
+*.suo
+*.user
+vc10/Debug/
+vc10/Release/
+/bin/
+/inc/
+/lib/

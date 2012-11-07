@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0CD59930-2753-11E2-A475-E0CB4E90556E}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0CD71FD1-2753-11E2-96D0-E0CB4E90556E}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{0CD71FCF-2753-11E2-B5B8-E0CB4E90556E}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="SFMLGame">
+      <UniqueIdentifier>{0CD71FD4-2753-11E2-9F7C-E0CB4E90556E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SFMLGame\Header Files">
+      <UniqueIdentifier>{0CD71FD3-2753-11E2-8A12-E0CB4E90556E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SFMLGame\Source Files">
+      <UniqueIdentifier>{0CD71FD0-2753-11E2-AF8E-E0CB4E90556E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\Animation.cpp">
+      <Filter>SFMLGame\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\Resources.cpp">
+      <Filter>SFMLGame\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\Entity.cpp">
+      <Filter>SFMLGame\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\Game.cpp">
+      <Filter>SFMLGame\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\LinearGradient.cpp">
+      <Filter>SFMLGame\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PerroTiled.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\rx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\SFMLGame.h">
+      <Filter>SFMLGame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\Animation.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\common.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\Entity.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\Game.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\Resources.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\LinearGradient.h">
+      <Filter>SFMLGame\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PerroTiled.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\rx.json">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\tools\rx.py">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\tools\rx.cpp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\tools\rx.h">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

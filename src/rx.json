@@ -1,0 +1,31 @@
+{
+	"textures": {
+		"kPerro": {
+			"filename": "gfx/perro.png",
+			"origin": "26,78",
+			"size": "52,80"
+		},
+
+		"kRuby": {
+			"filename": "gfx/ruby.png",
+			"origin": "26,78",
+			"size": "52,80"
+		},
+
+		"kGroundTexture": {
+			"filename": "maps/map_ground.png",
+			"origin": "0,0",
+			"size": "32,32"
+		}
+	},
+
+	"animations": {
+		"kWalking": {
+			"duration": 0.1,
+			"frames": [
+				{ "texture": "*,1" },
+				{ "texture": "*,2" }
+			]
+		}
+	}
+}
