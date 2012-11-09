@@ -1,6 +1,5 @@
 #include "rx.h"
 #include "core/SFMLGame.h"
-#include "Camera.h"
 #include "Map.h"
 
 bool Map::load(const char *name)
@@ -55,21 +54,22 @@ bool Map::load(const char *name)
 			
 			if (tiles_[i].solid)
 			{
-				imageIndex_ = chooseShadow(x, y, flipX_, flipY_);
+				bool flipX, flipY;
+				int imageIndex = chooseShadow(x, y, flipX, flipY);
 
-				tx0.x = (imageIndex_ % n) * tileSize_.x;
-				tx0.y = static_cast<int>(imageIndex_ / n) * tileSize_.y;
+				tx0.x = (imageIndex % n) * tileSize_.x;
+				tx0.y = static_cast<int>(imageIndex / n) * tileSize_.y;
 				tx1.x = tx0.x + tileSize_.x;
 				tx1.y = tx0.y + tileSize_.y;
 
-				if (flipX_)
+				if (flipX)
 				{
 					tmp = tx0.x;
 					tx0.x = tx1.x;
 					tx1.x = tmp;
 				}
 
-				if (flipY_)
+				if (flipY)
 				{
 					tmp = tx0.y;
 					tx0.y = tx1.y;
@@ -111,14 +111,27 @@ void Map::draw(RenderTarget &renderTarget, sf::RenderStates states) const
 
 bool Map::checkCollision(const FloatRect &rect)
 {
+	int x0 = static_cast<int>(std::floor(rect.left / tileSize_.x));
+	int y0 = static_cast<int>(std::floor(rect.top / tileSize_.y));
+	int x1 = static_cast<int>(std::floor((rect.left + rect.width) / tileSize_.x));
+	int y1 = static_cast<int>(std::floor((rect.top + rect.height) / tileSize_.y));
+
+	for (int x = x0; x <= x1; x++)
+	{
+		for (int y = y0; y <= y1; y++)
+		{
+			if (x >= 0 && y >= 0 && x < static_cast<int>(size_.x) && y < static_cast<int>(size_.y))
+			{
+				if (isTileSolid(x, y)) return true;
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+
 	return false;
-}
-
-bool Map::checkCollision(Entity *entity)
-{
-	assert(entity != 0);
-
-	return checkCollision(entity->getBounds());
 }
 
 bool Map::isTileSolid(Uint32 x, Uint32 y)
@@ -128,9 +141,14 @@ bool Map::isTileSolid(Uint32 x, Uint32 y)
 	return tiles_[x + y * size_.x].solid;
 }
 
-Vector2f Map::getSize()
+Vector2f Map::getRealSize()
 {
 	return Vector2f(static_cast<float>(size_.x) * tileSize_.x, static_cast<float>(size_.y) * tileSize_.y);
+}
+
+const Vector2f &Map::getTileSize()
+{
+	return tileSize_;
 }
 
 int Map::chooseShadow(Uint32 x, Uint32 y, bool &flipX, bool &flipY)

@@ -4,7 +4,10 @@ class PerroTiled : public Game
 {
 	public:
 
-		PerroTiled() : background(FloatRect(), Color::Blue, Color::White, LinearGradient::kVertical), worldTexture(0) {}
+		PerroTiled()
+			:	background(FloatRect(), Color::Blue, Color::White, LinearGradient::kVertical),
+				worldTexture(0),
+				keySpace(false) {}
 
 		~PerroTiled();
 
@@ -18,13 +21,13 @@ class PerroTiled : public Game
 
 	private:
 
-		Vector2f getViewSize();
-
 		Map map;
 		Camera camera;
-		Player player;
+		Player players[2];
 		LinearGradient background;
 
 		sf::RenderTexture *worldTexture;
 		sf::Sprite worldSprite;
+
+		bool keySpace;
 };

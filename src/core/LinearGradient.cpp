@@ -12,89 +12,81 @@ LinearGradient::LinearGradient()
 }
 
 LinearGradient::LinearGradient(const sf::FloatRect &rect, const sf::Color &startColor, const sf::Color &endColor, LinearGradient::Direction direction)
-	:	isHorizontal_(direction == LinearGradient::kHorizontal),
-		rect_(rect),
-		startColor_(startColor),
-		endColor_(endColor)
 {
+	isHorizontal_ = (direction == kHorizontal);
+
+	setRect(rect);
+	setStartColor(startColor);
+	setEndColor(endColor);
+}
+
+void LinearGradient::swapDirection()
+{
+	sf::Vertex v = vertices_[1];
+	vertices_[1] = vertices_[3];
+	vertices_[3] = v;
 }
 
 void LinearGradient::setRect(const sf::FloatRect &rect)
 {
-	rect_ = rect;
+	if (isHorizontal_) swapDirection();
+
+	vertices_[0].position.x = rect.left;
+	vertices_[0].position.y = rect.top;
+
+	if (isHorizontal_)
+	{
+		vertices_[1].position.x = rect.left;
+		vertices_[1].position.y = rect.top + rect.height;
+	}
+	else
+	{
+		vertices_[1].position.x = rect.left + rect.width;
+		vertices_[1].position.y = rect.top;
+	}
+
+	vertices_[2].position.x = rect.left + rect.width;
+	vertices_[2].position.y = rect.top + rect.height;
+
+	if (isHorizontal_)
+	{
+		vertices_[3].position.x = rect.left + rect.width;
+		vertices_[3].position.y = rect.top;
+	}
+	else
+	{
+		vertices_[3].position.x = rect.left;
+		vertices_[3].position.y = rect.top + rect.height;
+	}
+
+	if (isHorizontal_) swapDirection();
 }
 
 void LinearGradient::setStartColor(const sf::Color &startColor)
 {
-	startColor_ = startColor;
+	vertices_[0].color = startColor;
+	vertices_[1].color = startColor;
 }
 
 void LinearGradient::setEndColor(const sf::Color &endColor)
 {
-	endColor_ = endColor;
+	vertices_[2].color = endColor;
+	vertices_[3].color = endColor;
 }
 
 void LinearGradient::setDirection(Direction direction)
 {
-	isHorizontal_ = (direction == LinearGradient::kHorizontal);
-}
+	bool isHorizontal = (direction == LinearGradient::kHorizontal);
 
-const sf::FloatRect &LinearGradient::getRect() const
-{
-	return rect_;
-}
+	if (isHorizontal_ != isHorizontal)
+	{
+		isHorizontal_ = isHorizontal;
 
-const sf::Color &LinearGradient::getStartColor() const
-{
-	return startColor_;
-}
-
-const sf::Color &LinearGradient::getEndColor() const
-{
-	return endColor_;
-}
-
-LinearGradient::Direction LinearGradient::getDirection() const
-{
-	return (isHorizontal_ ? LinearGradient::kHorizontal : LinearGradient::kVertical);
+		swapDirection();
+	}
 }
 
 void LinearGradient::draw(sf::RenderTarget &renderTarget, sf::RenderStates states) const
 {
-	GLboolean glTextureEnabled = glIsEnabled(GL_TEXTURE_2D);
-
-	if (glTextureEnabled == GL_TRUE) glDisable(GL_TEXTURE_2D);
-
-	glLoadIdentity();
-
-	glBegin(GL_QUADS);
-
-	if (isHorizontal_)
-	{
-		glColor4f(startColor_.r / 255.0f, startColor_.g / 255.0f, startColor_.b / 255.0f, startColor_.a / 255.0f);
-
-		glVertex2f(rect_.left, rect_.top);
-		glVertex2f(rect_.left, rect_.top + rect_.height);
-
-		glColor4f(endColor_.r / 255.0f, endColor_.g / 255.0f, endColor_.b / 255.0f, endColor_.a / 255.0f);
-
-		glVertex2f(rect_.left + rect_.width, rect_.top + rect_.height);
-		glVertex2f(rect_.left + rect_.width, rect_.top);
-	}
-	else
-	{
-		glColor4f(startColor_.r / 255.0f, startColor_.g / 255.0f, startColor_.b / 255.0f, startColor_.a / 255.0f);
-
-		glVertex2f(rect_.left, rect_.top);
-		glVertex2f(rect_.left + rect_.width, rect_.top);
-
-		glColor4f(endColor_.r / 255.0f, endColor_.g / 255.0f, endColor_.b / 255.0f, endColor_.a / 255.0f);
-
-		glVertex2f(rect_.left + rect_.width, rect_.top + rect_.height);
-		glVertex2f(rect_.left, rect_.top + rect_.height);
-	}
-
-	glEnd();
-
-	if (glTextureEnabled == GL_TRUE) glEnable(GL_TEXTURE_2D);
+	renderTarget.draw(vertices_, 4, sf::Quads);
 }

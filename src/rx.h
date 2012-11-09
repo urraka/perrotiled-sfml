@@ -12,7 +12,9 @@ namespace rx
 
 	enum Animations
 	{
+		kStanding,
 		kWalking,
+		kJumping,
 		kAnimationCount
 	};
 }

@@ -26,6 +26,14 @@
 				{ "texture": "*,1" },
 				{ "texture": "*,2" }
 			]
+		},
+
+		"kJumping": {
+			"frames": [ { "texture": "*,1" } ]
+		},
+
+		"kStanding": {
+			"frames": [ { "texture": "*,0" } ]
 		}
 	}
 }

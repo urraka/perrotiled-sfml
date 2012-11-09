@@ -10,7 +10,7 @@ class Animation
 
 		bool is(int animationId);
 		void reset();
-		void set(int animationId);
+		void set(int animationId, int startFrame = 0);
 		int  get();
 
 		int getCurrentTexture();

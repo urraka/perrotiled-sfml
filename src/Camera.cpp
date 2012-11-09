@@ -4,6 +4,8 @@
 
 void Camera::update(float dt)
 {
+	// TODO: center the map when it's smaller than the view
+
 	Entity::update(dt);
 
 	Vector2f objectivePosition(position_);
@@ -49,6 +51,11 @@ void Camera::update(float dt)
 void Camera::setObjective(Entity *objective)
 {
 	objective_ = objective;
+}
+
+Entity *Camera::getObjective()
+{
+	return objective_;
 }
 
 void Camera::setBounds(const Vector2f &bounds)

@@ -13,9 +13,11 @@ void Animation::update(float dt)
 {
 	if (id_ != -1)
 	{
-		time_ += dt;
-
 		const rx::Animation &anim = Resources::getAnimation(id_);
+
+		if (anim.frames[frame_].duration == 0.0f) return;
+
+		time_ += dt;
 
 		while (time_ > anim.frames[frame_].duration)
 		{
@@ -40,10 +42,10 @@ void Animation::reset()
 	time_ = 0.0f;
 }
 
-void Animation::set(int animationId)
+void Animation::set(int animationId, int startFrame)
 {
 	id_ = animationId;
-	frame_ = 0;
+	frame_ = startFrame;
 	time_ = 0.0f;
 }
 

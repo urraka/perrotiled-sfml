@@ -1,6 +1,6 @@
 #pragma once
 
-class Map : public Entity
+class Map : public sf::Drawable
 {
 	public:
 
@@ -8,17 +8,16 @@ class Map : public Entity
 
 		void update(float dt) {};
 
-		void draw(RenderTarget &renderTarget, sf::RenderStates states) const;
-
+		bool isTileSolid(Uint32 x, Uint32 y);
 		bool checkCollision(const FloatRect &rect);
 
-		bool checkCollision(Entity *entity);
-
-		Vector2f getSize();
+		Vector2f getRealSize();
+		const Vector2f &getTileSize();
 
 	private:
 
-		bool isTileSolid(Uint32 x, Uint32 y);
+		void draw(RenderTarget &renderTarget, sf::RenderStates states) const;
+
 		int chooseShadow(Uint32 x, Uint32 y, bool &flipX, bool &flipY);
 
 		enum FlipMode

@@ -18,7 +18,9 @@ namespace rx
 		textures[kRuby] = Texture("gfx/ruby.png", Vector2i(26,78), Vector2u(52,80));
 		textures[kPerro] = Texture("gfx/perro.png", Vector2i(26,78), Vector2u(52,80));
 
+		animations[kStanding].frames.push_back(Frame(-1, 0.0f, 0));
 		animations[kWalking].frames.push_back(Frame(-1, 0.10f, 1));
 		animations[kWalking].frames.push_back(Frame(-1, 0.10f, 2));
+		animations[kJumping].frames.push_back(Frame(-1, 0.0f, 1));
 	}
 }

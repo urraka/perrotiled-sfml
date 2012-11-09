@@ -2,6 +2,7 @@
 #include "core/SFMLGame.h"
 #include "Camera.h"
 #include "Map.h"
+#include "MapCollision.h"
 #include "Player.h"
 #include "PerroTiled.h"
 

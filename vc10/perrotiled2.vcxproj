@@ -92,6 +92,7 @@
     <ClCompile Include="..\src\core\Resources.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Map.cpp" />
+    <ClCompile Include="..\src\MapCollision.cpp" />
     <ClCompile Include="..\src\PerroTiled.cpp" />
     <ClCompile Include="..\src\Player.cpp" />
     <ClCompile Include="..\src\rx.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="..\src\core\Resources.h" />
     <ClInclude Include="..\src\core\SFMLGame.h" />
     <ClInclude Include="..\src\Map.h" />
+    <ClInclude Include="..\src\MapCollision.h" />
     <ClInclude Include="..\src\PerroTiled.h" />
     <ClInclude Include="..\src\Player.h" />
     <ClInclude Include="..\src\rx.h" />
