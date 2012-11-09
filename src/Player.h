@@ -15,6 +15,7 @@ class Player : public Entity
 
 		void init(int texture, const Controls &controls, Map *map);
 		void update(float dt);
+		void keyPressed(const sf::Event::KeyEvent &keyEvent);
 
 		FloatRect getBounds();
 
@@ -25,11 +26,13 @@ class Player : public Entity
 			Action()
 				:	goLeft(false),
 					goRight(false),
-					jump(false) {}
+					jump(false),
+					kick(false) {}
 
 			bool goLeft;
 			bool goRight;
 			bool jump;
+			bool kick;
 		};
 
 		Action processInput();

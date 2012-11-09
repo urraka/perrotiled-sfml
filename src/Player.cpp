@@ -96,6 +96,10 @@ void Player::update(float dt)
 	setImage(textureId_, animation_.getCurrentImageIndex());
 }
 
+void Player::keyPressed(const sf::Event::KeyEvent &keyEvent)
+{
+}
+
 Player::Action Player::processInput()
 {
 	Action action;

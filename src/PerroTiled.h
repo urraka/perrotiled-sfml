@@ -7,9 +7,11 @@ class PerroTiled : public Game
 		PerroTiled()
 			:	background(FloatRect(), Color::Blue, Color::White, LinearGradient::kVertical),
 				worldTexture(0),
-				keySpace(false) {}
+				fullscreen_(false) {}
 
 		~PerroTiled();
+
+	private:
 
 		void initialize(int argc = 0, char **argv = 0);
 
@@ -17,9 +19,9 @@ class PerroTiled : public Game
 
 		void draw(RenderTarget &renderTarget);
 
-		void onWindowResize(const Vector2u &size);
+		void windowResized(const Vector2u &size);
 
-	private:
+		void keyPressed(const sf::Event::KeyEvent &keyEvent);
 
 		Map map;
 		Camera camera;
@@ -29,5 +31,5 @@ class PerroTiled : public Game
 		sf::RenderTexture *worldTexture;
 		sf::Sprite worldSprite;
 
-		bool keySpace;
+		bool fullscreen_;
 };

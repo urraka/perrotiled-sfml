@@ -5,17 +5,25 @@ class Game
 	public:
 
 		Game::Game();
+
 		virtual Game::~Game();
 
-		// initialization
-		void setName(const char *name);
 		void setWindowless(bool isWindowless);
-		void setVideoMode(VideoMode videoMode);
-		void setWindowStyle(Uint32 style);
+
+		void setName(const char *name);
+
+		void setVideoMode(VideoMode videoMode, Uint32 style = sf::Style::Default);
+
+		void setVerticalSync(bool enabled);
+
+		bool isVerticalSyncEnabled();
+
 		void setTickRate(int tickrate);
 
 		void start(int argc = 0, char **argv = 0);
+
 		void quit();
+
 		int  getFps();
 
 		void interpolatePosition(Entity &entity);
@@ -27,7 +35,11 @@ class Game
 		virtual void initialize(int argc = 0, char **argv = 0) = 0;
 		virtual void update(float dt) = 0;
 		virtual void draw(RenderTarget &renderTarget) = 0;
-		virtual void onWindowResize(const Vector2u &size) {}
+
+		// events
+		virtual void windowResized(const Vector2u &size) {}
+		virtual void keyPressed(const sf::Event::KeyEvent &keyEvent) {};
+		virtual void keyReleased(const sf::Event::KeyEvent &keyEvent) {};
 
 	private:
 

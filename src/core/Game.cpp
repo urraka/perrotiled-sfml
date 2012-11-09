@@ -10,7 +10,7 @@ Game::Game()
 		quit_(false),
 		isVerticalSyncEnabled_(true),
 		isWindowless_(false),
-		windowStyle_(7U),
+		windowStyle_(sf::Style::Default),
 		videoMode_(800, 600)
 {
 	setTickRate(100);
@@ -117,12 +117,19 @@ void Game::start(int argc, char **argv)
 				{
 					quit();
 				}
-
-				if (evt.type == sf::Event::Resized)
+				else if (evt.type == sf::Event::Resized)
 				{
 					didLastFrameResize = resized = true;
 					wndResizeData.x = evt.size.width;
 					wndResizeData.y = evt.size.height;
+				}
+				else if (evt.type == sf::Event::KeyPressed)
+				{
+					keyPressed(evt.key);
+				}
+				else if (evt.type == sf::Event::KeyReleased)
+				{
+					keyReleased(evt.key);
 				}
 			}
 
@@ -133,7 +140,7 @@ void Game::start(int argc, char **argv)
 				if (wndCurrentSize != wndResizeData)
 				{
 					wndCurrentSize = wndResizeData;
-					onWindowResize(wndCurrentSize);
+					windowResized(wndCurrentSize);
 				}
 			}
 		}
@@ -161,14 +168,19 @@ int Game::getFps()
 
 void Game::setTickRate(int tickrate)
 {
+	assert(!started_);
+
 	dt_ = sf::seconds(1.0f / static_cast<float>(tickrate));
 }
 
 void Game::setName(const char *name)
 {
-	assert(!started_);
-
 	name_ = name;
+
+	if (mainWindow_ != 0)
+	{
+		mainWindow_->setTitle(name);
+	}
 }
 
 void Game::setWindowless(bool isWindowless)
@@ -178,17 +190,21 @@ void Game::setWindowless(bool isWindowless)
 	isWindowless_ = isWindowless;
 }
 
-void Game::setVideoMode(sf::VideoMode videoMode)
+void Game::setVideoMode(sf::VideoMode videoMode, Uint32 style)
 {
-	assert(!started_);
+	assert(!isWindowless_);
+
+	if (mainWindow_ != 0 && (videoMode != videoMode_ || style != windowStyle_))
+	{
+		mainWindow_->create(videoMode, name_, style);
+
+		if (isVerticalSyncEnabled_)
+		{
+			mainWindow_->setVerticalSyncEnabled(isVerticalSyncEnabled_);
+		}
+	}
 
 	videoMode_ = videoMode;
-}
-
-void Game::setWindowStyle(Uint32 style)
-{
-	assert(!started_);
-
 	windowStyle_ = style;
 }
 
@@ -210,4 +226,19 @@ void Game::interpolatePosition(Entity &entity)
 
 	entity.drawPosition_.x = std::floor(entity.drawPosition_.x);
 	entity.drawPosition_.y = std::floor(entity.drawPosition_.y);
+}
+
+void Game::setVerticalSync(bool enabled)
+{
+	isVerticalSyncEnabled_ = enabled;
+
+	if (mainWindow_ != 0)
+	{
+		mainWindow_->setVerticalSyncEnabled(enabled);
+	}
+}
+
+bool Game::isVerticalSyncEnabled()
+{
+	return isVerticalSyncEnabled_;
 }

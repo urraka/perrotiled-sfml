@@ -46,32 +46,47 @@ void PerroTiled::initialize(int argc, char **argv)
 
 void PerroTiled::update(float dt)
 {
-	if (Keyboard::isKeyPressed(Keyboard::Escape)) quit();
-
-	if (Keyboard::isKeyPressed(Keyboard::Space))
-	{
-		if (!keySpace)
-		{
-			if (camera.getObjective() == &players[0])
-			{
-				camera.setObjective(&players[1]);
-			}
-			else
-			{
-				camera.setObjective(&players[0]);
-			}
-		}
-
-		keySpace = true;
-	}
-	else
-	{
-		keySpace = false;
-	}
-
 	players[0].update(dt);
 	players[1].update(dt);
 	camera.update(dt);
+}
+
+void PerroTiled::keyPressed(const sf::Event::KeyEvent &keyEvent)
+{
+	if (keyEvent.code == Keyboard::Escape)
+	{
+		quit();
+	}
+	else if (keyEvent.code == Keyboard::Space)
+	{
+		if (camera.getObjective() == &players[0])
+		{
+			camera.setObjective(&players[1]);
+		}
+		else
+		{
+			camera.setObjective(&players[0]);
+		}
+	}
+	else if (keyEvent.code == Keyboard::F12 && keyEvent.alt)
+	{
+		if (fullscreen_)
+		{
+			fullscreen_ = false;
+			setVideoMode(sf::VideoMode(800, 600), sf::Style::Default);
+			windowResized(Vector2u(800, 600));
+		}
+		else
+		{
+			fullscreen_ = true;
+			setVideoMode(sf::VideoMode::getFullscreenModes().at(0), sf::Style::Fullscreen);
+		}
+	}
+	else
+	{
+		players[0].keyPressed(keyEvent);
+		players[1].keyPressed(keyEvent);
+	}
 }
 
 void PerroTiled::draw(RenderTarget &renderTarget)
@@ -90,9 +105,17 @@ void PerroTiled::draw(RenderTarget &renderTarget)
 	renderTarget.clear();
 	renderTarget.draw(background);
 	renderTarget.draw(worldSprite);
+
+	sf::Text text(String("FPS: ") + str(getFps()));
+	text.setPosition(10.0f, 10.0f);
+	text.setColor(Color::White);
+	text.setCharacterSize(12);
+	text.setStyle(sf::Text::Bold);
+
+	renderTarget.draw(text);
 }
 
-void PerroTiled::onWindowResize(const Vector2u &size)
+void PerroTiled::windowResized(const Vector2u &size)
 {
 	FloatRect rc(Vector2f(0, 0), Vector2f(size));
 
