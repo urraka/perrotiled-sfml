@@ -2,99 +2,199 @@
 #include "core/SFMLGame.h"
 #include "Map.h"
 
+#include "tinyxml2/tinyxml2.h"
+#include <iomanip>
+#include <algorithm>
+
 bool Map::load(const char *name)
 {
-	sf::Image image;
+	using tinyxml2::XMLDocument;
+	using tinyxml2::XMLElement;
+	using tinyxml2::XMLAttribute;
+	using tinyxml2::XML_NO_ERROR;
 
-	if (!image.loadFromFile(String("data/maps/") + name))
+	// load xml
+
+	XMLDocument xmlDocument;
+	String xmlFileName = String("data/maps/") + name + ".xml";
+
+	if (xmlDocument.LoadFile(xmlFileName.c_str()) != XML_NO_ERROR)
 	{
 		return false;
 	}
 
-	name_ = name;
-	size_ = image.getSize();
-	tileSize_.x = 32.0f;
-	tileSize_.y = 32.0f;
+	const XMLElement *nameElement        = xmlDocument.RootElement()->FirstChildElement("name");
+	const XMLElement *authorElement      = xmlDocument.RootElement()->FirstChildElement("author");
+	const XMLElement *tilesElement       = xmlDocument.RootElement()->FirstChildElement("tiles");
+	const XMLElement *spawnPointsElement = xmlDocument.RootElement()->FirstChildElement("spawnpoints");
 
+	name_ = nameElement->FirstChild()->ToText()->Value();
+	author_ = authorElement->FirstChild()->ToText()->Value();
+
+	std::vector<TileType> tileTypes;
+	const XMLElement *tileElement = tilesElement->FirstChildElement();
+
+	while (tileElement)
+	{
+		TileType tileType;
+
+		const XMLAttribute *colorAttr   = tileElement->FindAttribute("color");
+		const XMLAttribute *textureAttr = tileElement->FindAttribute("texture");
+		const XMLAttribute *solidAttr = tileElement->FindAttribute("solid");
+
+		Uint32 cl;
+		std::stringstream hexColor(colorAttr->Value() + 1);
+		hexColor >> std::hex >> cl;
+
+		tileType.color.a = 255;
+		tileType.color.r = static_cast<Uint8>((cl >> 16) & 0xFF);
+		tileType.color.g = static_cast<Uint8>((cl >> 8) & 0xFF);
+		tileType.color.b = static_cast<Uint8>(cl & 0xFF);
+
+		tileType.solid = true;
+
+		if (solidAttr && String("false") == solidAttr->Value())
+		{
+			tileType.solid = false;
+		}
+
+		tileType.texture = textureAttr->Value();
+
+		tileTypes.push_back(tileType);
+		tileElement = tileElement->NextSiblingElement();
+	}
+
+	// TODO: load spawn points
+
+	// load image
+
+	sf::Image image;
+	String imgFileName = String("data/maps/") + name + ".png";
+
+	if (!image.loadFromFile(imgFileName))
+	{
+		return false;
+	}
+
+	size_ = image.getSize();
 	tiles_.resize(size_.x * size_.y);
 
-	int nVertices = 0;
+	tileSize_.x = 40.0f;
+	tileSize_.y = 40.0f;
+
+	Uint32 nLayers = tileTypes.size();
+	Uint32 nChunksX = size_.x / chunkSize_ + (size_.x % chunkSize_ > 0 ? 1 : 0);
+	Uint32 nChunksY = size_.y / chunkSize_ + (size_.y % chunkSize_ > 0 ? 1 : 0);
+	Uint32 nChunks = nChunksX * nChunksY;
+
+	std::vector<std::vector<Uint32>> nVertices;
+	nVertices.resize(nLayers);
+
+	for (Uint32 i = 0; i < nLayers; i++)
+	{
+		nVertices[i].resize(nChunks);
+	}
 
 	for (Uint32 x = 0; x < size_.x; x++)
 	{
 		for (Uint32 y = 0; y < size_.y; y++)
 		{
+			Uint32 tileTypeIndex;
 			Uint32 i = x + y * size_.x;
+			Color color = image.getPixel(x, y);
 
-			tiles_[i].solid = (image.getPixel(x, y) == Color::Black);
-
-			if (tiles_[i].solid)
+			for (tileTypeIndex = 0; tileTypeIndex < tileTypes.size(); tileTypeIndex++)
 			{
-				nVertices += 4;
+				if (tileTypes[tileTypeIndex].color == color)
+					break;
+			}
+
+			if (tileTypeIndex < tileTypes.size())
+			{
+				tiles_[i].hasTexture = true;
+				tiles_[i].solid = tileTypes[tileTypeIndex].solid;
+
+				Uint32 iChunk = static_cast<Uint32>(x / chunkSize_) + static_cast<Uint32>(y / chunkSize_) * nChunksX;
+				nVertices[tileTypeIndex][iChunk] += 4;
+
+				// TODO: check if it should have a shadow and count shadow vertices for each chunk of the shadows layer
 			}
 		}
 	}
 
-	// all tiles have the same texture hardcoded, this should change in the future
+	layers_.resize(nLayers);
 
-	const rx::Texture &tx = Resources::getTexture(rx::kGroundTexture);
-	int n = static_cast<int>(tx.data->getSize().x / tx.size.x);
-
-	float tmp;
-	int iVertex = 0;
-	Vector2f tx0, tx1;
-
-	vertices_.resize(nVertices);
-
-	for (Uint32 x = 0; x < size_.x; x++)
+	for (Uint32 iLayer = 0; iLayer < nLayers; iLayer++)
 	{
-		for (Uint32 y = 0; y < size_.y; y++)
+		layers_[iLayer].texture.loadFromFile(String("data/maps/") + tileTypes[iLayer].texture);
+		layers_[iLayer].texture.setRepeated(true);
+		layers_[iLayer].chunks.resize(nChunks);
+
+		Vector2u textureSize = layers_[iLayer].texture.getSize();
+
+		for (Uint32 xChunk = 0; xChunk < nChunksX; xChunk++)
 		{
-			Uint32 i = x + y * size_.x;
-			
-			if (tiles_[i].solid)
+			for (Uint32 yChunk = 0; yChunk < nChunksY; yChunk++)
 			{
-				bool flipX, flipY;
-				int imageIndex = chooseShadow(x, y, flipX, flipY);
+				Uint32 iChunk = xChunk + yChunk * nChunksX;
+				std::vector<sf::Vertex> &vertices = layers_[iLayer].chunks[iChunk];
+				vertices.resize(nVertices[iLayer][iChunk]);
 
-				tx0.x = (imageIndex % n) * tileSize_.x;
-				tx0.y = static_cast<int>(imageIndex / n) * tileSize_.y;
-				tx1.x = tx0.x + tileSize_.x;
-				tx1.y = tx0.y + tileSize_.y;
+				Uint32 iVertex = 0;
 
-				if (flipX)
+				Uint32 xTile0 = xChunk * chunkSize_;
+				Uint32 yTile0 = yChunk * chunkSize_;
+				Uint32 xTile1 = xTile0 + chunkSize_;
+				Uint32 yTile1 = yTile0 + chunkSize_;
+
+				for (Uint32 xTile = xTile0; xTile < xTile1 && xTile < size_.x; xTile++)
 				{
-					tmp = tx0.x;
-					tx0.x = tx1.x;
-					tx1.x = tmp;
+					for (Uint32 yTile = yTile0; yTile < yTile1 && yTile < size_.y; yTile++)
+					{
+						Uint32 iTile = xTile + yTile * size_.x;
+
+						if (tiles_[iTile].hasTexture && tileTypes[iLayer].color == image.getPixel(xTile, yTile))
+						{
+							vertices[iVertex + 0].position.x = static_cast<float>(xTile) * tileSize_.x;
+							vertices[iVertex + 0].position.y = static_cast<float>(yTile) * tileSize_.y;
+							vertices[iVertex + 1].position.x = vertices[iVertex + 0].position.x;
+							vertices[iVertex + 1].position.y = vertices[iVertex + 0].position.y + tileSize_.y;
+							vertices[iVertex + 2].position.x = vertices[iVertex + 0].position.x + tileSize_.x;
+							vertices[iVertex + 2].position.y = vertices[iVertex + 0].position.y + tileSize_.y;
+							vertices[iVertex + 3].position.x = vertices[iVertex + 0].position.x + tileSize_.x;
+							vertices[iVertex + 3].position.y = vertices[iVertex + 0].position.y;
+
+							if (textureSize.x > 0 && textureSize.y > 0)
+							{
+								Vector2f tx0;
+								Vector2f tx1;
+
+								tx0.x = static_cast<float>((xTile * static_cast<Uint32>(tileSize_.x)) % textureSize.x);
+								tx0.y = static_cast<float>((yTile * static_cast<Uint32>(tileSize_.y)) % textureSize.y);
+								tx1.x = tx0.x + tileSize_.x;
+								tx1.y = tx0.y + tileSize_.y;
+
+								vertices[iVertex + 0].texCoords.x = tx0.x;
+								vertices[iVertex + 0].texCoords.y = tx0.y;
+								vertices[iVertex + 1].texCoords.x = tx0.x;
+								vertices[iVertex + 1].texCoords.y = tx1.y;
+								vertices[iVertex + 2].texCoords.x = tx1.x;
+								vertices[iVertex + 2].texCoords.y = tx1.y;
+								vertices[iVertex + 3].texCoords.x = tx1.x;
+								vertices[iVertex + 3].texCoords.y = tx0.y;
+							}
+							else
+							{
+								vertices[iVertex + 0].color = Color::Black;
+								vertices[iVertex + 1].color = Color::Black;
+								vertices[iVertex + 2].color = Color::Black;
+								vertices[iVertex + 3].color = Color::Black;
+							}
+
+							iVertex += 4;
+						}
+					}
 				}
-
-				if (flipY)
-				{
-					tmp = tx0.y;
-					tx0.y = tx1.y;
-					tx1.y = tmp;
-				}
-
-				vertices_[iVertex + 0].position.x = static_cast<float>(x) * tileSize_.x;
-				vertices_[iVertex + 0].position.y = static_cast<float>(y) * tileSize_.y;
-				vertices_[iVertex + 0].texCoords = tx0;
-
-				vertices_[iVertex + 1].position.x = vertices_[iVertex + 0].position.x;
-				vertices_[iVertex + 1].position.y = vertices_[iVertex + 0].position.y + tileSize_.y;
-				vertices_[iVertex + 1].texCoords.x = tx0.x;
-				vertices_[iVertex + 1].texCoords.y = tx1.y;
-
-				vertices_[iVertex + 2].position.x = vertices_[iVertex + 0].position.x + tileSize_.x;
-				vertices_[iVertex + 2].position.y = vertices_[iVertex + 0].position.y + tileSize_.y;
-				vertices_[iVertex + 2].texCoords = tx1;
-
-				vertices_[iVertex + 3].position.x = vertices_[iVertex + 0].position.x + tileSize_.x;
-				vertices_[iVertex + 3].position.y = vertices_[iVertex + 0].position.y;
-				vertices_[iVertex + 3].texCoords.x = tx1.x;
-				vertices_[iVertex + 3].texCoords.y = tx0.y;
-
-				iVertex += 4;
 			}
 		}
 	}
@@ -104,9 +204,33 @@ bool Map::load(const char *name)
 
 void Map::draw(RenderTarget &renderTarget, sf::RenderStates states) const
 {
-	const rx::Texture &tx = Resources::getTexture(rx::kGroundTexture);
+	const sf::View &view = renderTarget.getView();
+	const Vector2f &viewSize = view.getSize();
+	Vector2f viewPosition = view.getCenter() - viewSize / 2.0f;
 
-	renderTarget.draw(vertices_.data(), vertices_.size(), sf::Quads, tx.data);
+	Uint32 nChunksX = size_.x / chunkSize_ + (size_.x % chunkSize_ > 0 ? 1 : 0);
+	Uint32 nChunksY = size_.y / chunkSize_ + (size_.y % chunkSize_ > 0 ? 1 : 0);
+
+	Uint32 x0 = static_cast<Uint32>(std::max(0.0f, viewPosition.x) / tileSize_.x) / chunkSize_;
+	Uint32 y0 = static_cast<Uint32>(std::max(0.0f, viewPosition.y) / tileSize_.y) / chunkSize_;
+	Uint32 x1 = std::min(nChunksX - 1, x0 + static_cast<Uint32>(std::ceil(std::ceil(viewSize.x / tileSize_.x) / chunkSize_)));
+	Uint32 y1 = std::min(nChunksY - 1, y0 + static_cast<Uint32>(std::ceil(std::ceil(viewSize.y / tileSize_.y) / chunkSize_)));
+
+	std::vector<Layer>::const_iterator iLayer;
+	std::vector<std::vector<sf::Vertex>>::const_iterator iChunk;
+
+	for (iLayer = layers_.begin(); iLayer != layers_.end(); ++iLayer)
+	{
+		for (Uint32 x = x0; x <= x1; x++)
+		{
+			for (Uint32 y = y0; y <= y1; y++)
+			{
+				Uint32 iChunk = x + y * nChunksX;
+
+				renderTarget.draw(iLayer->chunks[iChunk].data(), iLayer->chunks[iChunk].size(), sf::Quads, &iLayer->texture);
+			}
+		}
+	}
 }
 
 bool Map::checkCollision(const FloatRect &rect)

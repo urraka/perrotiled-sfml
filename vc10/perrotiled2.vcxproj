@@ -96,6 +96,7 @@
     <ClCompile Include="..\src\PerroTiled.cpp" />
     <ClCompile Include="..\src\Player.cpp" />
     <ClCompile Include="..\src\rx.cpp" />
+    <ClCompile Include="..\src\tinyxml2\tinyxml2.cpp" />
     <None Include="..\tools\rx.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +113,7 @@
     <ClInclude Include="..\src\PerroTiled.h" />
     <ClInclude Include="..\src\Player.h" />
     <ClInclude Include="..\src\rx.h" />
+    <ClInclude Include="..\src\tinyxml2\tinyxml2.h" />
     <None Include="..\tools\rx.h" />
   </ItemGroup>
   <ItemGroup>

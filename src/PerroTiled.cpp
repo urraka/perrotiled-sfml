@@ -17,7 +17,7 @@ void PerroTiled::initialize(int argc, char **argv)
 
 	Resources::loadTextures("data/");
 
-	map.load("map.png");
+	map.load("map");
 
 	background.setRect(FloatRect(Vector2f(0.0f, 0.0f), Vector2f(viewSize)));
 
@@ -25,23 +25,22 @@ void PerroTiled::initialize(int argc, char **argv)
 	worldTexture->create(viewSize.x, viewSize.y);
 	worldSprite.setTexture(worldTexture->getTexture());
 
-	Player::Controls controls;
+	Player::Controls controls[2];
 
-	controls.left = Keyboard::Left;
-	controls.right = Keyboard::Right;
-	controls.jump = Keyboard::Up;
+	controls[0].left = Keyboard::Left;
+	controls[0].right = Keyboard::Right;
+	controls[0].jump = Keyboard::Up;
 
-	players[0].init(rx::kRuby, controls, &map);
+	controls[1].left = Keyboard::A;
+	controls[1].right = Keyboard::D;
+	controls[1].jump = Keyboard::W;
 
-	controls.left = Keyboard::A;
-	controls.right = Keyboard::D;
-	controls.jump = Keyboard::W;
-
-	players[1].init(rx::kPerro, controls, &map);
+	players[0].init(rx::kRuby, controls[1], &map);
+	players[1].init(rx::kPerro, controls[0], &map);
 
 	camera.setBounds(map.getRealSize());
 	camera.updateViewSize(viewSize);
-	camera.setObjective(&players[0]);
+	camera.setObjective(&players[1]);
 }
 
 void PerroTiled::update(float dt)

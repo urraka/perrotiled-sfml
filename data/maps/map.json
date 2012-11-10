@@ -1,0 +1,12 @@
+{
+	"name": "test",
+
+	"tiles": {
+		"#FFF": "ground.png",
+		"#F00": "othertexture.png"
+	},
+
+	"spawnPoints": {
+		
+	}
+}

@@ -4,6 +4,9 @@ class Map : public sf::Drawable
 {
 	public:
 
+		Map()
+			:	chunkSize_(32) {}
+
 		bool load(const char *name);
 
 		void update(float dt) {};
@@ -19,13 +22,6 @@ class Map : public sf::Drawable
 		void draw(RenderTarget &renderTarget, sf::RenderStates states) const;
 
 		int chooseShadow(Uint32 x, Uint32 y, bool &flipX, bool &flipY);
-
-		enum FlipMode
-		{
-			kFlipNone = 0,
-			kFlipX = 0x01,
-			kFlipY = 0x02
-		};
 
 		enum Shadows
 		{
@@ -51,17 +47,33 @@ class Map : public sf::Drawable
 			kShadowTlBlTrBr
 		};
 
+		struct TileType
+		{
+			Color color;
+			String texture;
+			bool solid;
+		};
+
 		struct Tile
 		{
 			bool solid;
+			bool hasTexture;
 
-			Tile() : solid(false) {}
+			Tile() : solid(false), hasTexture(false) {}
+		};
+
+		struct Layer
+		{
+			Texture texture;
+			std::vector<std::vector<sf::Vertex>> chunks;
 		};
 
 		String name_;
+		String author_;
+
 		Vector2u size_;
 		Vector2f tileSize_;
-		Vector2f viewSize_;
+		Uint32 chunkSize_;
 		std::vector<Tile> tiles_;
-		std::vector<sf::Vertex> vertices_;
+		std::vector<Layer> layers_;
 };

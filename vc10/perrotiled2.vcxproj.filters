@@ -22,6 +22,9 @@
     <Filter Include="SFMLGame\Source Files">
       <UniqueIdentifier>{0CD71FD0-2753-11E2-AF8E-E0CB4E90556E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tinyxml2">
+      <UniqueIdentifier>{fa80049a-9c0c-4625-a616-6ef6b0fe78f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -59,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="..\src\MapCollision.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tinyxml2\tinyxml2.cpp">
+      <Filter>tinyxml2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="..\src\MapCollision.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tinyxml2\tinyxml2.h">
+      <Filter>tinyxml2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

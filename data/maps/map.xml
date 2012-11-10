@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<map>
+	<name>test</name>
+	<author>urraka</author>
+	<tiles>
+		<tile color="#000000" texture="LavabrickCastle.png" />
+		<tile color="#FFFFFF" texture="GraniteSegments.png" solid="false" />
+	</tiles>
+	<spawnpoints>
+		<spawnpoint tile="2,5" position="middle,bottom" range="-32:32,0:0" />
+	</spawnpoints>
+</map>
