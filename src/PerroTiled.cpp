@@ -14,10 +14,11 @@ void PerroTiled::initialize(int argc, char **argv)
 
 	srand(static_cast<Uint32>(time(0)));
 
-	const Vector2u viewSize(800, 600);
+	const Vector2u viewSize(1024, 768);
 
 	setName("PerroTiled");
 	setVideoMode(sf::VideoMode(viewSize.x, viewSize.y));
+	setVerticalSync(true);
 
 	Resources::loadTextures("data/");
 
@@ -55,44 +56,6 @@ void PerroTiled::update(float dt)
 	camera.update(dt);
 }
 
-void PerroTiled::keyPressed(const sf::Event::KeyEvent &keyEvent)
-{
-	if (keyEvent.code == Keyboard::Escape)
-	{
-		quit();
-	}
-	else if (keyEvent.code == Keyboard::Space)
-	{
-		if (camera.getObjective() == &players[0])
-		{
-			camera.setObjective(&players[1]);
-		}
-		else
-		{
-			camera.setObjective(&players[0]);
-		}
-	}
-	else if (keyEvent.code == Keyboard::F12 && keyEvent.alt)
-	{
-		if (fullscreen_)
-		{
-			fullscreen_ = false;
-			setVideoMode(sf::VideoMode(800, 600), sf::Style::Default);
-			windowResized(Vector2u(800, 600));
-		}
-		else
-		{
-			fullscreen_ = true;
-			setVideoMode(sf::VideoMode::getFullscreenModes().at(0), sf::Style::Fullscreen);
-		}
-	}
-	else
-	{
-		players[0].keyPressed(keyEvent);
-		players[1].keyPressed(keyEvent);
-	}
-}
-
 void PerroTiled::draw(RenderTarget &renderTarget)
 {
 	interpolatePosition(players[0]);
@@ -117,6 +80,50 @@ void PerroTiled::draw(RenderTarget &renderTarget)
 	text.setStyle(sf::Text::Bold);
 
 	renderTarget.draw(text);
+}
+
+void PerroTiled::keyPressed(const sf::Event::KeyEvent &keyEvent)
+{
+	if (keyEvent.code == Keyboard::Escape)
+	{
+		quit();
+	}
+	else if (keyEvent.code == Keyboard::Tab)
+	{
+		if (camera.getObjective() == &players[0])
+		{
+			camera.setObjective(&players[1]);
+		}
+		else
+		{
+			camera.setObjective(&players[0]);
+		}
+	}
+	else if (keyEvent.code == Keyboard::F12 && keyEvent.alt)
+	{
+		if (fullscreen_)
+		{
+			fullscreen_ = false;
+			setVideoMode(sf::VideoMode(800, 600), sf::Style::Default);
+			windowResized(Vector2u(800, 600));
+		}
+		else
+		{
+			fullscreen_ = true;
+			setVideoMode(sf::VideoMode::getFullscreenModes().at(0), sf::Style::Fullscreen);
+		}
+	}
+	else if (keyEvent.code == Keyboard::Return)
+	{
+		players[0].respawn(&map);
+		players[1].respawn(&map);
+		camera.moveToObjective();
+	}
+	else
+	{
+		players[0].keyPressed(keyEvent);
+		players[1].keyPressed(keyEvent);
+	}
 }
 
 void PerroTiled::windowResized(const Vector2u &size)

@@ -12,10 +12,12 @@ bool Map::load(const char *name)
 	using tinyxml2::XMLAttribute;
 	using tinyxml2::XML_NO_ERROR;
 
+	String mapPath("data/maps/");
+
 	// load xml
 
 	XMLDocument xmlDocument;
-	String xmlFileName = String("data/maps/") + name + ".xml";
+	String xmlFileName = mapPath + name + ".xml";
 
 	if (xmlDocument.LoadFile(xmlFileName.c_str()) != XML_NO_ERROR)
 	{
@@ -27,8 +29,14 @@ bool Map::load(const char *name)
 	const XMLElement *tilesElement       = xmlDocument.RootElement()->FirstChildElement("tiles");
 	const XMLElement *spawnPointsElement = xmlDocument.RootElement()->FirstChildElement("spawnpoints");
 
-	name_ = nameElement->FirstChild()->ToText()->Value();
-	author_ = authorElement->FirstChild()->ToText()->Value();
+	if (!tilesElement || !spawnPointsElement)
+		return false;
+
+	if (nameElement && nameElement->FirstChild())
+		name_ = nameElement->FirstChild()->ToText()->Value();
+
+	if (authorElement && authorElement->FirstChild())
+		author_ = authorElement->FirstChild()->ToText()->Value();
 
 	tileSize_.x = 32;
 	tileSize_.y = 32;
@@ -44,6 +52,9 @@ bool Map::load(const char *name)
 		{
 			std::stringstream(tokens[0]) >> tileSize_.x;
 			std::stringstream(tokens[1]) >> tileSize_.y;
+
+			if (tileSize_.x == 0) tileSize_.x = 32;
+			if (tileSize_.y == 0) tileSize_.y = 32;
 		}
 	}
 
@@ -58,29 +69,41 @@ bool Map::load(const char *name)
 		const XMLAttribute *textureAttr = tileElement->FindAttribute("texture");
 		const XMLAttribute *solidAttr   = tileElement->FindAttribute("solid");
 
-		Uint32 cl;
-		std::stringstream hexColor(colorAttr->Value() + 1);
-		hexColor >> std::hex >> cl;
+		Uint32 uColor = 0;
+
+		if (colorAttr)
+		{
+			String strColor = String(colorAttr->Value()).substr(1);
+
+			if (strColor.size() == 3)
+				strColor = String(2, strColor[0]) + String(2, strColor[1]) + String(2, strColor[2]);
+
+			if (strColor.size() == 6)
+			{
+				std::stringstream hexColor(strColor);
+				hexColor >> std::hex >> uColor;
+			}
+		}
 
 		tileType.color.a = 255;
-		tileType.color.r = static_cast<Uint8>((cl >> 16) & 0xFF);
-		tileType.color.g = static_cast<Uint8>((cl >> 8) & 0xFF);
-		tileType.color.b = static_cast<Uint8>(cl & 0xFF);
+		tileType.color.r = static_cast<Uint8>((uColor >> 16) & 0xFF);
+		tileType.color.g = static_cast<Uint8>((uColor >> 8) & 0xFF);
+		tileType.color.b = static_cast<Uint8>(uColor & 0xFF);
 
 		tileType.solid = true;
 
 		if (solidAttr && String("false") == solidAttr->Value())
-		{
 			tileType.solid = false;
-		}
 
-		tileType.texture = textureAttr->Value();
+		if (textureAttr)
+			tileType.texture = textureAttr->Value();
 
 		tileTypes.push_back(tileType);
 		tileElement = tileElement->NextSiblingElement();
 	}
 
-	// TODO: load spawn points
+	if (tileTypes.size() == 0)
+		return false;
 
 	const XMLElement *spawnPointElement = spawnPointsElement->FirstChildElement();
 
@@ -96,29 +119,37 @@ bool Map::load(const char *name)
 		Vector2i maxRange;
 
 		std::vector<String> tokens;
-		hlp::tokenize(tileAttr->Value(), tokens, ",");
 
-		if (tokens.size() == 2)
+		if (tileAttr)
 		{
-			std::stringstream(tokens[0]) >> tile.x;
-			std::stringstream(tokens[1]) >> tile.y;
+			hlp::tokenize(tileAttr->Value(), tokens, ",");
+
+			if (tokens.size() == 2)
+			{
+				std::stringstream(tokens[0]) >> tile.x;
+				std::stringstream(tokens[1]) >> tile.y;
+			}
+
+			tokens.clear();
 		}
 
-		tokens.clear();
-		hlp::tokenize(positionAttr->Value(), tokens, ",");
-
-		if (tokens.size() == 2)
+		if (positionAttr)
 		{
-			if (tokens[0] == "left")   offset.x = 0;               else
-			if (tokens[0] == "middle") offset.x = tileSize_.x / 2; else
-			if (tokens[0] == "right")  offset.x = tileSize_.x;
+			hlp::tokenize(positionAttr->Value(), tokens, ",");
 
-			if (tokens[1] == "top")    offset.y = 0;               else
-			if (tokens[1] == "middle") offset.y = tileSize_.y / 2; else
-			if (tokens[1] == "bottom") offset.y = tileSize_.y;
+			if (tokens.size() == 2)
+			{
+				if (tokens[0] == "left")   offset.x = 0;               else
+				if (tokens[0] == "middle") offset.x = tileSize_.x / 2; else
+				if (tokens[0] == "right")  offset.x = tileSize_.x;
+
+				if (tokens[1] == "top")    offset.y = 0;               else
+				if (tokens[1] == "middle") offset.y = tileSize_.y / 2; else
+				if (tokens[1] == "bottom") offset.y = tileSize_.y;
+			}
+
+			tokens.clear();
 		}
-
-		tokens.clear();
 
 		if (rangeAttr)
 		{
@@ -153,12 +184,14 @@ bool Map::load(const char *name)
 		spawnPointElement = spawnPointElement->NextSiblingElement();
 	}
 
+	if (spawnAreas_.size() == 0)
+		return false;
+
 	// load image
 
 	sf::Image image;
-	String imgFileName = String("data/maps/") + name + ".png";
 
-	if (!image.loadFromFile(imgFileName))
+	if (!image.loadFromFile(mapPath + name + ".png"))
 	{
 		return false;
 	}
@@ -171,6 +204,7 @@ bool Map::load(const char *name)
 	Uint32 nChunksY = size_.y / chunkSize_ + (size_.y % chunkSize_ > 0 ? 1 : 0);
 	Uint32 nChunks = nChunksX * nChunksY;
 
+	Uint32 nTotalVertices = 0;
 	std::vector<std::vector<Uint32>> nVertices;
 	nVertices.resize(nLayers);
 
@@ -200,21 +234,26 @@ bool Map::load(const char *name)
 
 				Uint32 iChunk = static_cast<Uint32>(x / chunkSize_) + static_cast<Uint32>(y / chunkSize_) * nChunksX;
 				nVertices[tileTypeIndex][iChunk] += 4;
-
-				// TODO: check if it should have a shadow and count shadow vertices for each chunk of the shadows layer
+				nTotalVertices += 4;
 			}
 		}
 	}
+
+	if (nTotalVertices == 0)
+		return false;
 
 	layers_.resize(nLayers + 1); // + 1 for the shadows layer added after this loop
 
 	for (Uint32 iLayer = 0; iLayer < nLayers; iLayer++)
 	{
-		layers_[iLayer].texture.loadFromFile(String("data/maps/") + tileTypes[iLayer].texture);
-		layers_[iLayer].texture.setRepeated(true);
+		Vector2u textureSize;
 		layers_[iLayer].chunks.resize(nChunks);
 
-		Vector2u textureSize = layers_[iLayer].texture.getSize();
+		if (!tileTypes[iLayer].texture.empty() && layers_[iLayer].texture.loadFromFile(mapPath + tileTypes[iLayer].texture))
+		{
+			layers_[iLayer].texture.setRepeated(true);
+			textureSize = layers_[iLayer].texture.getSize();
+		}
 
 		for (Uint32 xChunk = 0; xChunk < nChunksX; xChunk++)
 		{
@@ -469,7 +508,7 @@ int Map::chooseShadow(Uint32 x, Uint32 y, bool &flipX, bool &flipY)
 	const Uint32 w = size_.x;
 	const Uint32 h = size_.y;
 
-	const bool isDefaultSolid = true;
+	const bool isDefaultSolid = false;
 
 	bool tile[8] = {};
 	bool shadow[8] = {};

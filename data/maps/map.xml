@@ -2,8 +2,8 @@
 <map>
 	<name>test</name>
 	<author>urraka</author>
-	<tiles size="50,50">
-		<tile color="#000000" texture="OceanJasperTiles.png" />
+	<tiles size="32,32">
+		<tile color="#000" texture="OceanJasperTiles.png" solid="true" />
 	</tiles>
 	<spawnpoints>
 		<spawnpoint tile="10,7" position="left,bottom" range="3:3,0:0" />

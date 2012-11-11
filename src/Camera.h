@@ -4,7 +4,11 @@ class Camera : public Entity
 {
 	public:
 
-		Camera() : kMinVel(20.0f), objective_(0) {}
+		Camera()
+			:	kMinVel(20.0f),
+				objective_(0),
+				changingObjectiveX_(false),
+				changingObjectiveY_(false) {}
 
 		void update(float dt);
 
@@ -28,4 +32,6 @@ class Camera : public Entity
 		Vector2f bounds_;
 
 		Entity *objective_;
+		bool changingObjectiveX_;
+		bool changingObjectiveY_;
 };

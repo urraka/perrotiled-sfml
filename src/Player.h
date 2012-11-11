@@ -15,6 +15,7 @@ class Player : public Entity
 
 		void init(int texture, const Controls &controls, Map *map);
 		void update(float dt);
+		void respawn(Map *map);
 		void keyPressed(const sf::Event::KeyEvent &keyEvent);
 
 		FloatRect getBounds();

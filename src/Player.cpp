@@ -19,6 +19,13 @@ void Player::init(int texture, const Controls &controls, Map *map)
 	mapCollision_.setObjectSize(size);
 }
 
+void Player::respawn(Map *map)
+{
+	velocity_.x = 0.0f;
+	velocity_.y = 0.0f;
+	position_ = map->getSpawnPoint();
+}
+
 void Player::update(float dt)
 {
 	Entity::update(dt);

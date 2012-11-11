@@ -37,6 +37,7 @@ void Game::start(int argc, char **argv)
 	{
 		mainWindow_ = new RenderWindow(videoMode_, name_, windowStyle_);
 		mainWindow_->setVerticalSyncEnabled(isVerticalSyncEnabled_);
+		mainWindow_->setMouseCursorVisible(false);
 	}
 
 	Clock clock;
@@ -197,6 +198,7 @@ void Game::setVideoMode(sf::VideoMode videoMode, Uint32 style)
 	if (mainWindow_ != 0 && (videoMode != videoMode_ || style != windowStyle_))
 	{
 		mainWindow_->create(videoMode, name_, style);
+		mainWindow_->setMouseCursorVisible(false);
 
 		if (isVerticalSyncEnabled_)
 		{
