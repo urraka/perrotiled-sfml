@@ -108,6 +108,7 @@
     <ClInclude Include="..\src\core\LinearGradient.h" />
     <ClInclude Include="..\src\core\Resources.h" />
     <ClInclude Include="..\src\core\SFMLGame.h" />
+    <ClInclude Include="..\src\helpers\helpers.h" />
     <ClInclude Include="..\src\Map.h" />
     <ClInclude Include="..\src\MapCollision.h" />
     <ClInclude Include="..\src\PerroTiled.h" />

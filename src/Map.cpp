@@ -1,10 +1,9 @@
 #include "rx.h"
 #include "core/SFMLGame.h"
 #include "Map.h"
-
 #include "tinyxml2/tinyxml2.h"
+#include "helpers/helpers.h"
 #include <iomanip>
-#include <algorithm>
 
 bool Map::load(const char *name)
 {
@@ -31,6 +30,23 @@ bool Map::load(const char *name)
 	name_ = nameElement->FirstChild()->ToText()->Value();
 	author_ = authorElement->FirstChild()->ToText()->Value();
 
+	tileSize_.x = 32;
+	tileSize_.y = 32;
+
+	const XMLAttribute *tileSizeAttr = tilesElement->FindAttribute("size");
+
+	if (tileSizeAttr)
+	{
+		std::vector<String> tokens;
+		hlp::tokenize(tileSizeAttr->Value(), tokens, ",");
+
+		if (tokens.size() == 2)
+		{
+			std::stringstream(tokens[0]) >> tileSize_.x;
+			std::stringstream(tokens[1]) >> tileSize_.y;
+		}
+	}
+
 	std::vector<TileType> tileTypes;
 	const XMLElement *tileElement = tilesElement->FirstChildElement();
 
@@ -40,7 +56,7 @@ bool Map::load(const char *name)
 
 		const XMLAttribute *colorAttr   = tileElement->FindAttribute("color");
 		const XMLAttribute *textureAttr = tileElement->FindAttribute("texture");
-		const XMLAttribute *solidAttr = tileElement->FindAttribute("solid");
+		const XMLAttribute *solidAttr   = tileElement->FindAttribute("solid");
 
 		Uint32 cl;
 		std::stringstream hexColor(colorAttr->Value() + 1);
@@ -66,6 +82,77 @@ bool Map::load(const char *name)
 
 	// TODO: load spawn points
 
+	const XMLElement *spawnPointElement = spawnPointsElement->FirstChildElement();
+
+	while (spawnPointElement)
+	{
+		const XMLAttribute *tileAttr     = spawnPointElement->FindAttribute("tile");
+		const XMLAttribute *positionAttr = spawnPointElement->FindAttribute("position");
+		const XMLAttribute *rangeAttr    = spawnPointElement->FindAttribute("range");
+
+		Vector2i tile;
+		Vector2i offset;
+		Vector2i minRange;
+		Vector2i maxRange;
+
+		std::vector<String> tokens;
+		hlp::tokenize(tileAttr->Value(), tokens, ",");
+
+		if (tokens.size() == 2)
+		{
+			std::stringstream(tokens[0]) >> tile.x;
+			std::stringstream(tokens[1]) >> tile.y;
+		}
+
+		tokens.clear();
+		hlp::tokenize(positionAttr->Value(), tokens, ",");
+
+		if (tokens.size() == 2)
+		{
+			if (tokens[0] == "left")   offset.x = 0;               else
+			if (tokens[0] == "middle") offset.x = tileSize_.x / 2; else
+			if (tokens[0] == "right")  offset.x = tileSize_.x;
+
+			if (tokens[1] == "top")    offset.y = 0;               else
+			if (tokens[1] == "middle") offset.y = tileSize_.y / 2; else
+			if (tokens[1] == "bottom") offset.y = tileSize_.y;
+		}
+
+		tokens.clear();
+
+		if (rangeAttr)
+		{
+			hlp::tokenize(rangeAttr->Value(), tokens, ",");
+
+			if (tokens.size() == 2)
+			{
+				std::vector<String> tokensx;
+				std::vector<String> tokensy;
+
+				hlp::tokenize(tokens[0], tokensx, ":");
+				hlp::tokenize(tokens[1], tokensy, ":");
+
+				if (tokensx.size() == 2 && tokensy.size() == 2)
+				{
+					std::stringstream(tokensx[0]) >> minRange.x;
+					std::stringstream(tokensx[1]) >> maxRange.x;
+					std::stringstream(tokensy[0]) >> minRange.y;
+					std::stringstream(tokensy[1]) >> maxRange.y;
+				}
+			}
+		}
+
+		IntRect area;
+
+		area.left   = tile.x * tileSize_.x + offset.x - minRange.x * tileSize_.x;
+		area.top    = tile.y * tileSize_.y + offset.y - minRange.y * tileSize_.y;
+		area.width  = maxRange.x * tileSize_.x + minRange.x * tileSize_.x;
+		area.height = maxRange.y * tileSize_.y + minRange.y * tileSize_.y;
+
+		spawnAreas_.push_back(area);
+		spawnPointElement = spawnPointElement->NextSiblingElement();
+	}
+
 	// load image
 
 	sf::Image image;
@@ -78,9 +165,6 @@ bool Map::load(const char *name)
 
 	size_ = image.getSize();
 	tiles_.resize(size_.x * size_.y);
-
-	tileSize_.x = 40.0f;
-	tileSize_.y = 40.0f;
 
 	Uint32 nLayers = tileTypes.size();
 	Uint32 nChunksX = size_.x / chunkSize_ + (size_.x % chunkSize_ > 0 ? 1 : 0);
@@ -169,8 +253,8 @@ bool Map::load(const char *name)
 								Vector2f tx0;
 								Vector2f tx1;
 
-								tx0.x = static_cast<float>((xTile * static_cast<Uint32>(tileSize_.x)) % textureSize.x);
-								tx0.y = static_cast<float>((yTile * static_cast<Uint32>(tileSize_.y)) % textureSize.y);
+								tx0.x = static_cast<float>((xTile * tileSize_.x) % textureSize.x);
+								tx0.y = static_cast<float>((yTile * tileSize_.y) % textureSize.y);
 								tx1.x = tx0.x + tileSize_.x;
 								tx1.y = tx0.y + tileSize_.y;
 
@@ -350,14 +434,32 @@ bool Map::isTileSolid(Uint32 x, Uint32 y)
 	return tiles_[x + y * size_.x].solid;
 }
 
-Vector2f Map::getRealSize()
+Vector2u Map::getRealSize()
 {
-	return Vector2f(static_cast<float>(size_.x) * tileSize_.x, static_cast<float>(size_.y) * tileSize_.y);
+	return Vector2u(size_.x * tileSize_.x, size_.y * tileSize_.y);
 }
 
-const Vector2f &Map::getTileSize()
+Vector2u Map::getTileSize()
 {
 	return tileSize_;
+}
+
+Vector2f Map::getSpawnPoint()
+{
+	Vector2i point;
+
+	int i = rand() % spawnAreas_.size();
+
+	point.x = spawnAreas_[i].left;
+	point.y = spawnAreas_[i].top;
+
+	if (spawnAreas_[i].width > 0)
+		point.x += rand() % spawnAreas_[i].width;
+
+	if (spawnAreas_[i].height > 0)
+		point.y += rand() % spawnAreas_[i].height;
+
+	return Vector2f(point);
 }
 
 int Map::chooseShadow(Uint32 x, Uint32 y, bool &flipX, bool &flipY)

@@ -23,8 +23,6 @@ void Camera::update(float dt)
 	objectivePosition.x = std::min(std::max(cameraMin.x, objectivePosition.x), cameraMax.x);
 	objectivePosition.y = std::min(std::max(cameraMin.y, objectivePosition.y), cameraMax.y);
 
-	// this is to fix position when resizing window
-
 	position_.x = std::min(std::max(cameraMin.x, position_.x), cameraMax.x);
 	position_.y = std::min(std::max(cameraMin.y, position_.y), cameraMax.y);
 
@@ -46,6 +44,12 @@ void Camera::update(float dt)
 	// update position & zoom
 
 	position_ += velocity_ * dt;
+}
+
+void Camera::moveToObjective()
+{
+	if (objective_)
+		position_ = objective_->getPosition();
 }
 
 void Camera::setObjective(Entity *objective)

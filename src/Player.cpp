@@ -8,7 +8,7 @@ void Player::init(int texture, const Controls &controls, Map *map)
 {
 	textureId_ = texture;
 	controls_ = controls;
-	position_ = Vector2f(260.0f, 200.0f);
+	position_ = map->getSpawnPoint();
 
 	FloatRect bounds = getBounds();
 	Vector2f origin = -(Vector2f(bounds.left, bounds.top) - position_);

@@ -48,10 +48,3 @@ using sf::Sprite;
 using sf::Color;
 
 const double PI = std::atan(1.0) * 4;
-
-template <typename T> inline String str(const T& t)
-{
-	std::ostringstream os;
-	os << t;
-	return os.str();
-}

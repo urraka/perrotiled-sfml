@@ -6,9 +6,13 @@
 #include "Player.h"
 #include "PerroTiled.h"
 
+#include "helpers/helpers.h"
+
 void PerroTiled::initialize(int argc, char **argv)
 {
 	rx::initialize();
+
+	srand(static_cast<Uint32>(time(0)));
 
 	const Vector2u viewSize(800, 600);
 
@@ -38,9 +42,10 @@ void PerroTiled::initialize(int argc, char **argv)
 	players[0].init(rx::kRuby, controls[1], &map);
 	players[1].init(rx::kPerro, controls[0], &map);
 
-	camera.setBounds(map.getRealSize());
+	camera.setBounds(Vector2f(map.getRealSize()));
 	camera.updateViewSize(viewSize);
 	camera.setObjective(&players[1]);
+	camera.moveToObjective();
 }
 
 void PerroTiled::update(float dt)
@@ -105,7 +110,7 @@ void PerroTiled::draw(RenderTarget &renderTarget)
 	renderTarget.draw(background);
 	renderTarget.draw(worldSprite);
 
-	sf::Text text(String("FPS: ") + str(getFps()));
+	sf::Text text(String("FPS: ") + hlp::toString(getFps()));
 	text.setPosition(10.0f, 10.0f);
 	text.setColor(Color::White);
 	text.setCharacterSize(12);
@@ -121,6 +126,7 @@ void PerroTiled::windowResized(const Vector2u &size)
 	getRenderWindow().setView(sf::View(rc));
 
 	camera.updateViewSize(size);
+	camera.moveToObjective();
 	background.setRect(rc);
 
 	delete worldTexture;

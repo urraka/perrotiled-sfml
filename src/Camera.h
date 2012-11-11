@@ -8,7 +8,10 @@ class Camera : public Entity
 
 		void update(float dt);
 
+		void moveToObjective();
+
 		void setObjective(Entity *objective);
+
 		Entity *getObjective();
 
 		void setBounds(const Vector2f &bounds);

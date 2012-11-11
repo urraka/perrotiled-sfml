@@ -14,8 +14,10 @@ class Map : public sf::Drawable
 		bool isTileSolid(Uint32 x, Uint32 y);
 		bool checkCollision(const FloatRect &rect);
 
-		Vector2f getRealSize();
-		const Vector2f &getTileSize();
+		Vector2u getRealSize();
+		Vector2u getTileSize();
+
+		Vector2f getSpawnPoint();
 
 	private:
 
@@ -25,26 +27,9 @@ class Map : public sf::Drawable
 
 		enum Shadows
 		{
-			kShadowNone = 0,
-			kShadowL,
-			kShadowT,
-			kShadowTL,
-			kShadowLR,
-			kShadowTB,
-			kShadowTLR,
-			kShadowTLB,
-			kShadowTLBR,
-			kShadowTl,
-			kShadowTlR,
-			kShadowTlB,
-			kShadowTlRB,
-			kShadowTlBr,
-			kShadowTlTr,
-			kShadowTlBl,
-			kShadowTlTrB,
-			kShadowTlBlR,
-			kShadowTlBlTr,
-			kShadowTlBlTrBr
+			kShadowNone = 0, kShadowL, kShadowT, kShadowTL, kShadowLR, kShadowTB, kShadowTLR,
+			kShadowTLB, kShadowTLBR, kShadowTl, kShadowTlR, kShadowTlB, kShadowTlRB, kShadowTlBr,
+			kShadowTlTr, kShadowTlBl, kShadowTlTrB, kShadowTlBlR, kShadowTlBlTr, kShadowTlBlTrBr
 		};
 
 		struct TileType
@@ -72,8 +57,9 @@ class Map : public sf::Drawable
 		String author_;
 
 		Vector2u size_;
-		Vector2f tileSize_;
+		Vector2u tileSize_;
 		Uint32 chunkSize_;
 		std::vector<Tile> tiles_;
 		std::vector<Layer> layers_;
+		std::vector<IntRect> spawnAreas_;
 };

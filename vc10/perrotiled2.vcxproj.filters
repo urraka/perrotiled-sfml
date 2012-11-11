@@ -25,6 +25,9 @@
     <Filter Include="tinyxml2">
       <UniqueIdentifier>{fa80049a-9c0c-4625-a616-6ef6b0fe78f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="helpers">
+      <UniqueIdentifier>{7a8da7b0-75d0-40e7-814d-c6d3ca662fd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -109,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="..\src\tinyxml2\tinyxml2.h">
       <Filter>tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\helpers\helpers.h">
+      <Filter>helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
