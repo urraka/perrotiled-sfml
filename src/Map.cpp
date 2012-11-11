@@ -122,7 +122,7 @@ bool Map::load(const char *name)
 		}
 	}
 
-	layers_.resize(nLayers);
+	layers_.resize(nLayers + 1); // + 1 for the shadows layer added after this loop
 
 	for (Uint32 iLayer = 0; iLayer < nLayers; iLayer++)
 	{
@@ -193,6 +193,91 @@ bool Map::load(const char *name)
 
 							iVertex += 4;
 						}
+					}
+				}
+			}
+		}
+	}
+
+	// add shadows layer
+
+	Uint32 iLayer = layers_.size() - 1;
+
+	layers_[iLayer].texture.loadFromFile("data/gfx/shadows.png");
+	Vector2u shadowsSize = layers_[iLayer].texture.getSize();
+	Vector2f shadowSize = Vector2f(32.0f, 32.0f);
+
+	layers_[iLayer].chunks.resize(nChunks);
+
+	for (Uint32 xChunk = 0; xChunk < nChunksX; xChunk++)
+	{
+		for (Uint32 yChunk = 0; yChunk < nChunksY; yChunk++)
+		{
+			Uint32 iChunk = xChunk + yChunk * nChunksX;
+			std::vector<sf::Vertex> &vertices = layers_[iLayer].chunks[iChunk];
+
+			Uint32 iVertex = 0;
+
+			Uint32 xTile0 = xChunk * chunkSize_;
+			Uint32 yTile0 = yChunk * chunkSize_;
+			Uint32 xTile1 = xTile0 + chunkSize_;
+			Uint32 yTile1 = yTile0 + chunkSize_;
+
+			for (Uint32 xTile = xTile0; xTile < xTile1 && xTile < size_.x; xTile++)
+			{
+				for (Uint32 yTile = yTile0; yTile < yTile1 && yTile < size_.y; yTile++)
+				{
+					if (!isTileSolid(xTile, yTile))
+						continue;
+
+					bool flipX, flipY;
+					int shadow = chooseShadow(xTile, yTile, flipX, flipY);
+
+					if (shadow != kShadowNone)
+					{
+						vertices.resize(vertices.size() + 4);
+
+						vertices[iVertex + 0].position.x = static_cast<float>(xTile) * tileSize_.x;
+						vertices[iVertex + 0].position.y = static_cast<float>(yTile) * tileSize_.y;
+						vertices[iVertex + 1].position.x = vertices[iVertex + 0].position.x;
+						vertices[iVertex + 1].position.y = vertices[iVertex + 0].position.y + tileSize_.y;
+						vertices[iVertex + 2].position.x = vertices[iVertex + 0].position.x + tileSize_.x;
+						vertices[iVertex + 2].position.y = vertices[iVertex + 0].position.y + tileSize_.y;
+						vertices[iVertex + 3].position.x = vertices[iVertex + 0].position.x + tileSize_.x;
+						vertices[iVertex + 3].position.y = vertices[iVertex + 0].position.y;
+
+						int n = static_cast<int>(shadowsSize.x / shadowSize.x);
+
+						Vector2f tx0, tx1;
+						tx0.x = (shadow % n) * shadowSize.x;
+						tx0.y = static_cast<int>(shadow / n) * shadowSize.y;
+						tx1.x = tx0.x + shadowSize.x;
+						tx1.y = tx0.y + shadowSize.y;
+
+						if (flipX)
+						{
+							float tmp = tx0.x;
+							tx0.x = tx1.x;
+							tx1.x = tmp;
+						}
+
+						if (flipY)
+						{
+							float tmp = tx0.y;
+							tx0.y = tx1.y;
+							tx1.y = tmp;
+						}
+
+						vertices[iVertex + 0].texCoords.x = tx0.x;
+						vertices[iVertex + 0].texCoords.y = tx0.y;
+						vertices[iVertex + 1].texCoords.x = tx0.x;
+						vertices[iVertex + 1].texCoords.y = tx1.y;
+						vertices[iVertex + 2].texCoords.x = tx1.x;
+						vertices[iVertex + 2].texCoords.y = tx1.y;
+						vertices[iVertex + 3].texCoords.x = tx1.x;
+						vertices[iVertex + 3].texCoords.y = tx0.y;
+
+						iVertex += 4;
 					}
 				}
 			}
