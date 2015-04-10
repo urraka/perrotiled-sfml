@@ -46,11 +46,10 @@ void MapCollision::update()
 
 		// fast axis
 
-		if (delta.*fast != 0.0f)
+		if (currentPosition_.*fast != pos.*fast)
 		{
 			if (abs(currentPosition_.*fast - pos.*fast) <= abs(delta.*fast))
 			{
-				delta.*fast = 0.0f;
 				pos.*fast = currentPosition_.*fast;
 			}
 			else
@@ -87,21 +86,38 @@ void MapCollision::update()
 					}
 				}
 
-				delta.*fast = 0.0f;
-				pos.*fast = prevPos.*fast;
-				currentPosition_.*fast = prevPos.*fast;
+				if (pos.*fast == std::floor(pos.*fast))
+				{
+					pos.*fast = std::floor(prevPos.*fast);
+					currentPosition_.*fast = std::floor(prevPos.*fast);
+				}
+				else
+				{
+					if (delta.*fast > 0.0f)
+					{
+						pos.*fast = std::floor(pos.*fast);
+						currentPosition_.*fast = std::floor(pos.*fast);
+					}
+					else
+					{
+						pos.*fast = std::ceil(pos.*fast);
+						currentPosition_.*fast = std::ceil(pos.*fast);
+					}
+				}
 
+				delta.*fast = 0.0f;
 				delta.*slow = (delta.*slow > 0.0f ? 1.0f : (delta.*slow < 0.0f ? -1.0f : 0.0f));
 			}
 		}
 
 		// slow axis
 
-		if (delta.*slow != 0.0f)
+		// BUG: prevPos = pos?
+
+		if (currentPosition_.*slow != pos.*slow)
 		{
 			if (abs(currentPosition_.*slow - pos.*slow) <= abs(delta.*slow))
 			{
-				delta.*slow = 0.0f;
 				pos.*slow = currentPosition_.*slow;
 			}
 			else
@@ -138,9 +154,26 @@ void MapCollision::update()
 					}
 				}
 
+				if (pos.*slow == std::floor(pos.*slow))
+				{
+					pos.*slow = std::floor(prevPos.*slow);
+					currentPosition_.*slow = std::floor(prevPos.*slow);
+				}
+				else
+				{
+					if (delta.*slow > 0.0f)
+					{
+						pos.*slow = std::floor(pos.*slow);
+						currentPosition_.*slow = std::floor(pos.*slow);
+					}
+					else
+					{
+						pos.*slow = std::ceil(pos.*slow);
+						currentPosition_.*slow = std::ceil(pos.*slow);
+					}
+				}
+
 				delta.*slow = 0.0f;
-				pos.*slow = prevPos.*slow;
-				currentPosition_.*slow = prevPos.*slow;
 			}
 		}
 	}

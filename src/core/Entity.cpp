@@ -124,3 +124,8 @@ const Vector2f &Entity::getPosition() const
 {
 	return position_;
 }
+
+const Vector2f &Entity::getVelocity() const
+{
+	return velocity_;
+}

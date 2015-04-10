@@ -18,11 +18,12 @@ void PerroTiled::initialize(int argc, char **argv)
 
 	setName("PerroTiled");
 	setVideoMode(sf::VideoMode(viewSize.x, viewSize.y));
-	setVerticalSync(true);
+	setVerticalSync(false);
+	setTickRate(100);
 
 	Resources::loadTextures("data/");
 
-	map.load("map");
+	map.load("map2");
 
 	background.setRect(FloatRect(Vector2f(0.0f, 0.0f), Vector2f(viewSize)));
 

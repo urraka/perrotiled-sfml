@@ -12,6 +12,7 @@ class Entity : public sf::Drawable
 		void setImage(int textureId, int imageIndex = 0);
 
 		const Vector2f &getPosition() const;
+		const Vector2f &getVelocity() const;
 
 		virtual void update(float dt);
 		virtual bool checkCollision(Entity *entity);

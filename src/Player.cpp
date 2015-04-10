@@ -69,15 +69,15 @@ void Player::update(float dt)
 
 	position_ = mapCollision_.getCorrectedPosition();
 
-	if (mapCollision_.collides(MapCollision::kTop))
+	if (mapCollision_.collides(MapCollision::kTop) || mapCollision_.collides(MapCollision::kBottom))
 	{
 		velocity_.y = 0.0f;
 	}
 
-	if (mapCollision_.collides(MapCollision::kBottom))
+	/*if (mapCollision_.collides(MapCollision::kBottom))
 	{
 		velocity_.y = 1.0f / dt;
-	}
+	}*/
 
 	if (mapCollision_.collides(MapCollision::kBottom))
 	{

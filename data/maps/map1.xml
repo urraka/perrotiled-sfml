@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<map>
+	<name>test</name>
+	<author>urraka</author>
+	<tiles size="32,32">
+		<tile color="#000" texture="test.png" solid="true" />
+		<tile color="#FFF" texture="ground.png" solid="false" />
+		<tile color="#F00" texture="OceanJasperTiles.png" solid="true" />
+	</tiles>
+	<spawnpoints>
+		<spawnpoint tile="20,14" position="left,bottom" range="6:6,0:0" />
+		<spawnpoint tile="20,23" position="left,bottom" range="6:6,0:0" />
+		<spawnpoint tile="8,10" position="left,bottom" range="0:0,0:0" />
+		<spawnpoint tile="70,16" position="left,bottom" range="2:2,0:0" />
+		<spawnpoint tile="113,46" position="left,bottom" range="2:2,0:0" />
+		<spawnpoint tile="70,74" position="middle,middle" range="4:4,4:4" />
+		<spawnpoint tile="156,78" position="middle,bottom" range="2:2,0:0" />
+		<spawnpoint tile="184,8" position="left,bottom" range="60:4,0:0" />
+	</spawnpoints>
+</map>

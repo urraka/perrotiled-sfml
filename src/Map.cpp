@@ -252,6 +252,7 @@ bool Map::load(const char *name)
 		if (!tileTypes[iLayer].texture.empty() && layers_[iLayer].texture.loadFromFile(mapPath + tileTypes[iLayer].texture))
 		{
 			layers_[iLayer].texture.setRepeated(true);
+			layers_[iLayer].texture.setSmooth(true);
 			textureSize = layers_[iLayer].texture.getSize();
 		}
 
@@ -327,6 +328,7 @@ bool Map::load(const char *name)
 	Uint32 iLayer = layers_.size() - 1;
 
 	layers_[iLayer].texture.loadFromFile("data/gfx/shadows.png");
+	layers_[iLayer].texture.setSmooth(false);
 	Vector2u shadowsSize = layers_[iLayer].texture.getSize();
 	Vector2f shadowSize = Vector2f(32.0f, 32.0f);
 
@@ -370,12 +372,13 @@ bool Map::load(const char *name)
 						vertices[iVertex + 3].position.y = vertices[iVertex + 0].position.y;
 
 						int n = static_cast<int>(shadowsSize.x / shadowSize.x);
+						const float k = 0.0f;
 
 						Vector2f tx0, tx1;
-						tx0.x = (shadow % n) * shadowSize.x;
-						tx0.y = static_cast<int>(shadow / n) * shadowSize.y;
-						tx1.x = tx0.x + shadowSize.x;
-						tx1.y = tx0.y + shadowSize.y;
+						tx0.x = (shadow % n) * shadowSize.x + k;
+						tx0.y = static_cast<int>(shadow / n) * shadowSize.y + k;
+						tx1.x = tx0.x + shadowSize.x - 2.0f * k;
+						tx1.y = tx0.y + shadowSize.y - 2.0f * k;
 
 						if (flipX)
 						{
@@ -448,15 +451,23 @@ bool Map::checkCollision(const FloatRect &rect)
 	int x1 = static_cast<int>(std::floor((rect.left + rect.width) / tileSize_.x));
 	int y1 = static_cast<int>(std::floor((rect.top + rect.height) / tileSize_.y));
 
+	FloatRect rcTile(Vector2f(0.0f, 0.0f), Vector2f(tileSize_));
+
 	for (int x = x0; x <= x1; x++)
 	{
 		for (int y = y0; y <= y1; y++)
 		{
+			rcTile.left = static_cast<float>(x * tileSize_.x);
+			rcTile.top = static_cast<float>(y * tileSize_.y);
+
 			if (x >= 0 && y >= 0 && x < static_cast<int>(size_.x) && y < static_cast<int>(size_.y))
 			{
-				if (isTileSolid(x, y)) return true;
+				if (isTileSolid(x, y) && rect.intersects(rcTile))
+				{
+					return true;
+				}
 			}
-			else
+			else if (rect.intersects(rcTile))
 			{
 				return true;
 			}

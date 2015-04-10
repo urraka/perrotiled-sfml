@@ -5,12 +5,12 @@ class Camera : public Entity
 	public:
 
 		Camera()
-			:	kMinVel(20.0f),
-				objective_(0),
+			:	objective_(0),
 				changingObjectiveX_(false),
 				changingObjectiveY_(false) {}
 
 		void update(float dt);
+		void update2(float dt);
 
 		void moveToObjective();
 
@@ -26,12 +26,13 @@ class Camera : public Entity
 
 	private:
 
-		const float kMinVel;
+		Entity *objective_;
+
+		Vector2f acceleration_;
 
 		sf::View view_;
 		Vector2f bounds_;
 
-		Entity *objective_;
 		bool changingObjectiveX_;
 		bool changingObjectiveY_;
 };

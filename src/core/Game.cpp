@@ -42,7 +42,7 @@ void Game::start(int argc, char **argv)
 
 	Clock clock;
 
-	const Time oneSecond = sf::milliseconds(1000);
+	const Time twoSeconds = sf::milliseconds(2000);
 	const Time maxFrameTime = sf::milliseconds(250);
 
 	Time t;
@@ -68,10 +68,10 @@ void Game::start(int argc, char **argv)
 
 		fpsTime += frameTime;
 
-		if (fpsTime >= oneSecond)
+		if (fpsTime >= twoSeconds)
 		{
-			fpsTime -= oneSecond;
-			fps_ = frameCount;
+			fpsTime -= twoSeconds;
+			fps_ = static_cast<int>(std::floor(frameCount / 2.0f + 0.5f));
 			frameCount = 0;
 		}
 
@@ -219,7 +219,9 @@ RenderWindow &Game::getRenderWindow()
 
 void Game::interpolatePosition(Entity &entity)
 {
-	entity.drawPosition_ = entity.position_;
+	entity.drawPosition_ = entity.position_ * interpolateValue_ + entity.previousPosition_ * (1.0f - interpolateValue_);
+
+	/*entity.drawPosition_ = entity.position_;
 
 	if (entity.position_ != entity.previousPosition_)
 	{
@@ -227,7 +229,7 @@ void Game::interpolatePosition(Entity &entity)
 	}
 
 	entity.drawPosition_.x = std::floor(entity.drawPosition_.x);
-	entity.drawPosition_.y = std::floor(entity.drawPosition_.y);
+	entity.drawPosition_.y = std::floor(entity.drawPosition_.y);*/
 }
 
 void Game::setVerticalSync(bool enabled)
